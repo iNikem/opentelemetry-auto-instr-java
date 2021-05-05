@@ -46,7 +46,7 @@ public class GwtTracer extends BaseTracer {
       return;
     }
 
-    tracer().onException(context, throwable);
+    endSpan(context, throwable);
   }
 
   @Override

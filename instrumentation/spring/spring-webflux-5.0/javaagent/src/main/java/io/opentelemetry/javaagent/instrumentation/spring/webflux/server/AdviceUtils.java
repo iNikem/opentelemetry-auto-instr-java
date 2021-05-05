@@ -70,10 +70,11 @@ public class AdviceUtils {
     if (context != null) {
       Span span = Span.fromContext(context);
       if (throwable != null) {
-        span.setStatus(StatusCode.ERROR);
         span.recordException(throwable);
+        span.end(StatusCode.ERROR);
+      } else {
+        span.end();
       }
-      span.end();
     }
   }
 

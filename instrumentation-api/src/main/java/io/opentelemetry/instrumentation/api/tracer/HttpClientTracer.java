@@ -11,6 +11,7 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapSetter;
 import io.opentelemetry.instrumentation.api.tracer.net.NetPeerAttributes;
@@ -102,8 +103,16 @@ public abstract class HttpClientTracer<REQUEST, CARRIER, RESPONSE> extends BaseT
 
   public void end(Context context, RESPONSE response, long endTimeNanos) {
     Span span = Span.fromContext(context);
-    onResponse(span, response);
-    super.end(context, endTimeNanos);
+    StatusCode statusCode = StatusCode.UNSET;
+    if (response != null) {
+      onResponse(span, response);
+
+      Integer status = status(response);
+      if (status != null) {
+        statusCode = HttpStatusConverter.statusFromHttpStatus(status);
+      }
+    }
+    super.end(context, endTimeNanos, statusCode, "");
   }
 
   public void endExceptionally(Context context, RESPONSE response, Throwable throwable) {
@@ -113,7 +122,9 @@ public abstract class HttpClientTracer<REQUEST, CARRIER, RESPONSE> extends BaseT
   public void endExceptionally(
       Context context, RESPONSE response, Throwable throwable, long endTimeNanos) {
     Span span = Span.fromContext(context);
-    onResponse(span, response);
+    if (response != null) {
+      onResponse(span, response);
+    }
     super.endExceptionally(context, throwable, endTimeNanos);
   }
 
@@ -136,8 +147,7 @@ public abstract class HttpClientTracer<REQUEST, CARRIER, RESPONSE> extends BaseT
       spanBuilder.setStartTimestamp(startTimeNanos, TimeUnit.NANOSECONDS);
     }
     onRequest(spanBuilder, request);
-    Span span = spanBuilder.startSpan();
-    return span;
+    return spanBuilder.startSpan();
   }
 
   protected void onRequest(SpanBuilder spanBuilder, REQUEST request) {
@@ -191,13 +201,9 @@ public abstract class HttpClientTracer<REQUEST, CARRIER, RESPONSE> extends BaseT
   }
 
   protected void onResponse(Span span, RESPONSE response) {
-    assert span != null;
-    if (response != null) {
-      Integer status = status(response);
-      if (status != null) {
-        span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, (long) status);
-        span.setStatus(HttpStatusConverter.statusFromHttpStatus(status));
-      }
+    Integer status = status(response);
+    if (status != null) {
+      span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, (long) status);
     }
   }
 

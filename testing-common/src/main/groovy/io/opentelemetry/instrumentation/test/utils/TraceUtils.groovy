@@ -40,9 +40,8 @@ class TraceUtils {
         span.end()
         return result
       } catch (final Exception e) {
-        span.setStatus(StatusCode.ERROR)
         span.recordException(e instanceof ExecutionException ? e.getCause() : e)
-        span.end()
+        span.end(StatusCode.ERROR)
         throw e
       }
     } catch (Throwable t) {

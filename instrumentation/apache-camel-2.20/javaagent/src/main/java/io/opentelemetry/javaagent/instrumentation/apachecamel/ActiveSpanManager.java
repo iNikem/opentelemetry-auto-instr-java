@@ -25,6 +25,7 @@ package io.opentelemetry.javaagent.instrumentation.apachecamel;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Scope;
 import org.apache.camel.Exchange;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -75,7 +76,7 @@ class ActiveSpanManager {
     SpanWithScope spanWithScope = exchange.getProperty(ACTIVE_SPAN_PROPERTY, SpanWithScope.class);
 
     if (spanWithScope != null) {
-      spanWithScope.deactivate();
+      spanWithScope.deactivate(exchange.isFailed() ? StatusCode.ERROR : StatusCode.UNSET);
       exchange.setProperty(ACTIVE_SPAN_PROPERTY, spanWithScope.getParent());
       LOG.debug("Deactivated span: {}", spanWithScope);
     }
@@ -115,8 +116,8 @@ class ActiveSpanManager {
       return span;
     }
 
-    public void deactivate() {
-      span.end();
+    public void deactivate(StatusCode statusCode) {
+      span.end(statusCode);
       scope.close();
     }
 

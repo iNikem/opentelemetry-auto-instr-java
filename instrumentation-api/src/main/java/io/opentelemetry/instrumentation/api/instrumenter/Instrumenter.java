@@ -156,12 +156,10 @@ public class Instrumenter<REQUEST, RESPONSE> {
       span.recordException(error);
     }
 
-    span.setStatus(spanStatusExtractor.extract(request, response, error));
-
     if (endTimeExtractor != null) {
-      span.end(endTimeExtractor.extract(response));
+      span.end(endTimeExtractor.extract(response), spanStatusExtractor.extract(request, response, error), "");
     } else {
-      span.end();
+      span.end(spanStatusExtractor.extract(request, response, error));
     }
   }
 }

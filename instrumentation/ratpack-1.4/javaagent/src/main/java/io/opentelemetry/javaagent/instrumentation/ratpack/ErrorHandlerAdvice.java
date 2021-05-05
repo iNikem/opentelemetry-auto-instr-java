@@ -18,7 +18,8 @@ public class ErrorHandlerAdvice {
     Optional<io.opentelemetry.context.Context> otelContext =
         ctx.maybeGet(io.opentelemetry.context.Context.class);
     if (otelContext.isPresent()) {
-      tracer().onException(otelContext.get(), throwable);
+      tracer().onContext(otelContext.get(), ctx);
+      tracer().endExceptionally(otelContext.get(), throwable);
     }
   }
 }

@@ -105,11 +105,8 @@ class BaseSpanDecorator implements SpanDecorator {
 
   @Override
   public void post(Span span, Exchange exchange, Endpoint endpoint) {
-    if (exchange.isFailed()) {
-      span.setStatus(StatusCode.ERROR);
-      if (exchange.getException() != null) {
-        span.recordException(exchange.getException());
-      }
+    if (exchange.getException() != null) {
+      span.recordException(exchange.getException());
     }
   }
 

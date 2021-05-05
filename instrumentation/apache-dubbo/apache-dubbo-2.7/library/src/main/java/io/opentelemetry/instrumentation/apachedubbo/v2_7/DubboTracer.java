@@ -45,9 +45,7 @@ class DubboTracer extends RpcServerTracer<RpcInvocation> {
   }
 
   public void end(Context context, Result result) {
-    Span span = Span.fromContext(context);
-    span.setStatus(DubboHelper.statusFromResult(result));
-    end(context);
+    end(context, -1, DubboHelper.statusFromResult(result), "");
   }
 
   @Override

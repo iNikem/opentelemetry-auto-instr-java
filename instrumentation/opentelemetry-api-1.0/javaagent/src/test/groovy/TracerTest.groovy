@@ -24,8 +24,7 @@ class TracerTest extends AgentInstrumentationSpecification {
     testSpan.setAttribute("long", 2)
     testSpan.setAttribute("double", 3.0)
     testSpan.setAttribute("boolean", true)
-    testSpan.setStatus(ERROR)
-    testSpan.end()
+    testSpan.end(ERROR)
 
     then:
     assertTraces(1) {

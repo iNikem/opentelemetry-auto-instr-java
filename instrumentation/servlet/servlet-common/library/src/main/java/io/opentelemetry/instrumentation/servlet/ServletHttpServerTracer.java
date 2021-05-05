@@ -221,11 +221,10 @@ public abstract class ServletHttpServerTracer<REQUEST, RESPONSE>
 
   public void onTimeout(Context context, long timeout) {
     Span span = Span.fromContext(context);
-    span.setStatus(StatusCode.ERROR);
     if (CAPTURE_EXPERIMENTAL_SPAN_ATTRIBUTES) {
       span.setAttribute("servlet.timeout", timeout);
     }
-    span.end();
+    span.end(StatusCode.ERROR);
   }
 
   /*

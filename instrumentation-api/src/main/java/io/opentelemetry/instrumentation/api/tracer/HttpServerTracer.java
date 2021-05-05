@@ -105,7 +105,8 @@ public abstract class HttpServerTracer<REQUEST, RESPONSE, CONNECTION, STORAGE> e
   public void end(Context context, RESPONSE response, long timestamp) {
     Span span = Span.fromContext(context);
     setStatus(span, responseStatus(response));
-    end(context, timestamp);
+    //TODO duplicate call to responseStatus()
+    end(context, timestamp, HttpStatusConverter.statusFromHttpStatus(responseStatus(response)), "");
   }
 
   /**
@@ -133,12 +134,9 @@ public abstract class HttpServerTracer<REQUEST, RESPONSE, CONNECTION, STORAGE> e
       Context context, Throwable throwable, RESPONSE response, long timestamp) {
     onException(context, throwable);
     Span span = Span.fromContext(context);
-    if (response == null) {
-      setStatus(span, 500);
-    } else {
-      setStatus(span, responseStatus(response));
-    }
-    end(context, timestamp);
+    int responseStatusCode = response == null ? 500 : responseStatus(response);
+    setStatus(span, responseStatusCode);
+    end(context, timestamp, HttpStatusConverter.statusFromHttpStatus(responseStatusCode), "");
   }
 
   public Span getServerSpan(STORAGE storage) {
@@ -252,9 +250,6 @@ public abstract class HttpServerTracer<REQUEST, RESPONSE, CONNECTION, STORAGE> e
 
   private static void setStatus(Span span, int status) {
     span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, (long) status);
-    // TODO status_message
-    // See https://github.com/open-telemetry/opentelemetry-specification/issues/950
-    span.setStatus(HttpStatusConverter.statusFromHttpStatus(status));
   }
 
   @Nullable

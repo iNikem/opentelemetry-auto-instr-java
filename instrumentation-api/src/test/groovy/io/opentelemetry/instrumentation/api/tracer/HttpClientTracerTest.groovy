@@ -115,21 +115,13 @@ class HttpClientTracerTest extends BaseTracerTest {
     then:
     if (status) {
       1 * span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, status)
-      1 * span.setStatus(HttpStatusConverter.statusFromHttpStatus(status))
     }
     0 * _
 
     where:
     status | resp
     200    | [status: 200]
-    399    | [status: 399]
-    400    | [status: 400]
-    499    | [status: 499]
-    500    | [status: 500]
-    500    | [status: 500]
-    600    | [status: 600]
     null   | [status: null]
-    null   | null
   }
 
   @Override

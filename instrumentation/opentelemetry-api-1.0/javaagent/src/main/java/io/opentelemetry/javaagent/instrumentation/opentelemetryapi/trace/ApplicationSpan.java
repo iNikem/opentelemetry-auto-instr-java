@@ -121,13 +121,13 @@ class ApplicationSpan implements Span {
   }
 
   @Override
-  public void end() {
-    agentSpan.end();
+  public void end(StatusCode spanStatus, String description) {
+    agentSpan.end(Bridging.toAgent(spanStatus), description);
   }
 
   @Override
-  public void end(long timestamp, TimeUnit unit) {
-    agentSpan.end(timestamp, unit);
+  public void end(long timestamp, TimeUnit unit, StatusCode statusCode, String description) {
+    agentSpan.end(timestamp, unit, Bridging.toAgent(statusCode), description);
   }
 
   @Override

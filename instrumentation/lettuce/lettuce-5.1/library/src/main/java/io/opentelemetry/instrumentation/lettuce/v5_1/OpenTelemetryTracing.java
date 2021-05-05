@@ -223,14 +223,14 @@ final class OpenTelemetryTracing implements Tracing {
               }
 
               CommandOutput<?, ?, ?> output = command.getOutput();
-              if (output != null) {
-                String error = output.getError();
-                if (error != null) {
-                  span.setStatus(StatusCode.ERROR, error);
-                }
-              }
+//              if (output != null) {
+//                String error = output.getError();
+//                if (error != null) {
+//                  span.setStatus(StatusCode.ERROR, error);
+//                }
+//              }
 
-              finish(span);
+              finish(span, output != null && output.hasError() ? StatusCode.ERROR : StatusCode.UNSET);
             });
       }
 
@@ -253,9 +253,7 @@ final class OpenTelemetryTracing implements Tracing {
       }
 
       if (error != null) {
-        span.setStatus(StatusCode.ERROR);
         span.recordException(error);
-        error = null;
       }
 
       return this;
@@ -302,16 +300,16 @@ final class OpenTelemetryTracing implements Tracing {
     @Override
     public synchronized void finish() {
       if (span != null) {
-        finish(span);
+        finish(span, error == null ? StatusCode.UNSET : StatusCode.ERROR);
       }
     }
 
-    private void finish(Span span) {
+    private void finish(Span span, StatusCode statusCode) {
       if (name != null) {
         String statement = RedisCommandSanitizer.sanitize(name, splitArgs(args));
         span.setAttribute(SemanticAttributes.DB_STATEMENT, statement);
       }
-      span.end();
+      span.end(statusCode);
     }
   }
 

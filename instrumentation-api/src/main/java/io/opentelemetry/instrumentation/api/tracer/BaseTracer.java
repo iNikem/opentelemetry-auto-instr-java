@@ -222,7 +222,7 @@ public abstract class BaseTracer {
 
   /** Ends the execution of a span stored in the passed {@code context}. */
   public void end(Context context) {
-    end(context, -1);
+    end(context, -1, StatusCode.UNSET, "");
   }
 
   /**
@@ -230,12 +230,12 @@ public abstract class BaseTracer {
    *
    * @param endTimeNanos Explicit nanoseconds timestamp from the epoch.
    */
-  public void end(Context context, long endTimeNanos) {
+  public void end(Context context, long endTimeNanos, StatusCode statusCode, String description) {
     Span span = Span.fromContext(context);
     if (endTimeNanos > 0) {
-      span.end(endTimeNanos, TimeUnit.NANOSECONDS);
+      span.end(endTimeNanos, TimeUnit.NANOSECONDS, statusCode, description);
     } else {
-      span.end();
+      span.end(statusCode);
     }
   }
 
@@ -256,11 +256,11 @@ public abstract class BaseTracer {
    *
    * @param endTimeNanos Explicit nanoseconds timestamp from the epoch.
    * @see #onException(Context, Throwable)
-   * @see #end(Context, long)
+   * @see #end(Context, long, StatusCode)
    */
   public void endExceptionally(Context context, Throwable throwable, long endTimeNanos) {
     onException(context, throwable);
-    end(context, endTimeNanos);
+    end(context, endTimeNanos, StatusCode.ERROR, "");
   }
 
   /**
@@ -270,7 +270,6 @@ public abstract class BaseTracer {
    */
   public void onException(Context context, Throwable throwable) {
     Span span = Span.fromContext(context);
-    span.setStatus(StatusCode.ERROR);
     span.recordException(unwrapThrowable(throwable));
   }
 

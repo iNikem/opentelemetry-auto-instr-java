@@ -164,7 +164,6 @@ public class HttpUrlConnectionInstrumentationModule extends InstrumentationModul
       if (httpUrlState != null) {
         Span span = Java8BytecodeBridge.spanFromContext(httpUrlState.context);
         span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, returnValue);
-        span.setStatus(HttpStatusConverter.statusFromHttpStatus(returnValue));
       }
     }
   }

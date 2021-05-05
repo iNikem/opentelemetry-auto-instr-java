@@ -612,7 +612,7 @@ abstract class HttpServerTest<SERVER> extends InstrumentationSpecification imple
           "${SemanticAttributes.NET_PEER_NAME}" "localhost"
         }
         if (extraAttributes.contains(SemanticAttributes.NET_TRANSPORT)) {
-          "${SemanticAttributes.NET_TRANSPORT}" SemanticAttributes.NetTransportValues.IP_TCP.value
+          "${SemanticAttributes.NET_TRANSPORT}" SemanticAttributes.NetTransportValues.IP_TCP
         }
       }
     }
